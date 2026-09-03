@@ -37,7 +37,7 @@ def move_enemies(field, enemies, hero):
 
     return np.asarray(updated, dtype=int).reshape(-1, 2)
 
-def game_over(enemies, hero, goal, field):
+def game_over(enemies, hero, goal):
     """return 'win', 'lose', or None while the game continues."""
     if np.array_equal(goal, hero):
         return "win"
@@ -54,19 +54,12 @@ def move_hero(path, hero):
     return hero
 
 def teleport(costmap, field, rng):
-    """Move the hero to a randomly selected safe free cell."""
+    """move the hero to a randomly selected safe free cell."""
     
     free_cells = np.argwhere((costmap == 0) & (field == 0))
     selected = rng.integers(len(free_cells))
     print(Fore.BLUE + "Teleport Used!")
     return free_cells[selected].astype(int)
-
-
-
-
-
-
-
 
 
 

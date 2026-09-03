@@ -8,9 +8,7 @@ from a_star import a_star
 from game_logic import move_enemies, game_over, move_hero, teleport
 from costmap import build_costmap, nav2_cmap, display_costs
 from colorama import Fore, Style, init
-import time
 from matplotlib.colors import Normalize
-
 
 MAP_SIZE = 64
 RESOLUTION = 0.1
@@ -157,7 +155,7 @@ def main():
         enemy_plot.set_data(enemy_x, enemy_y)
         goal_plot.set_data([goal_x], [goal_y])
 
-        result = game_over(enemies, hero, goal, field)
+        result = game_over(enemies, hero, goal)
 
         if result == "lose":
             axis.set_title("Game Over")
