@@ -4,22 +4,22 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
-from a_star import a_star
-from game_logic import move_enemies, game_over, move_hero, teleport
-from costmap import build_costmap, nav2_cmap, display_costs
+from .a_star import a_star
+from .game_logic import move_enemies, game_over, move_hero, teleport
+from .costmap import build_costmap, nav2_cmap, display_costs
 from colorama import Fore, Style, init
 from matplotlib.colors import Normalize
+import time
+from .flatland import a_star_rs
 
-MAP_SIZE = 64
-RESOLUTION = 0.1
-ENEMY_COUNT = 10
-SPEED = 500 # in ms
+RESOLUTION = 0.1 # grid resolution
+DIFFICULTY = 0 # 0 = easy, 1 = medium, 2 = hard
 
 init(autoreset=True)
 
-def build_field(coverage_percent, rng):
+def build_field(size, coverage_percent, rng):
     '''randomly generate a field with a specific % of obstacles in it'''
-    field = np.zeros((MAP_SIZE, MAP_SIZE), dtype=np.int8)
+    field = np.zeros((size, size), dtype=np.int8)
 
     tetrominoes = [
         [(0, 0), (1, 0), (2, 0), (2, 1)],
@@ -33,22 +33,22 @@ def build_field(coverage_percent, rng):
         max_x = max(x for x, _ in tetromino)
         max_y = max(y for _, y in tetromino)
 
-        x0 = rng.integers(0, MAP_SIZE - max_x)
-        y0 = rng.integers(0, MAP_SIZE - max_y)
+        x0 = rng.integers(0, size - max_x)
+        y0 = rng.integers(0, size - max_y)
 
         for dx, dy in tetromino:
             field[y0 + dy, x0 + dx] = 100
 
     return field
 
-def choose_positions(field, rng):
+def choose_positions(field, enemy_count, rng):
     '''choose initial positions for the goal, enemies, and hero'''
     free_cells = np.argwhere(field == 0)
 
-    if len(free_cells) < ENEMY_COUNT + 2:
+    if len(free_cells) < enemy_count + 2:
         raise ValueError("not enough free cells!")
 
-    selected = rng.choice(len(free_cells), ENEMY_COUNT + 2, replace=False)
+    selected = rng.choice(len(free_cells), enemy_count + 2, replace=False)
 
     hero = free_cells[selected[0]]
     goal = free_cells[selected[1]]
@@ -56,28 +56,39 @@ def choose_positions(field, rng):
 
     return hero, goal, enemies
 
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--coverage","-c", type=float, default=20.0) # percent coverage
+    parser.add_argument("--seed","-r", type=int, default=None)
+    parser.add_argument("--speed","-ms", type=int, default=500) # update speed in ms
+    parser.add_argument("--size", "-s", type=int, default=64) # grid size
+    parser.add_argument("--rust-backend", "-b", action="store_true")
+    parser.add_argument("--enemies", "-e", type=int, default=10)
+    #parser.add_argument("--hard-mode", "-h", action="store_true") # make enmies smarter
+    return parser.parse_args()
+
 def main():
     '''main setup and update loop'''
     teleport_counter = 0
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--coverage", type=float, default=20.0) # percent coverage
-    parser.add_argument("--seed", type=int, default=None)
-    arguments = parser.parse_args()
+    args = get_args()
 
-    rng = np.random.default_rng(arguments.seed)
-    field = build_field(arguments.coverage, rng)
-    hero, goal, enemies = choose_positions(field, rng)
+    rng = np.random.default_rng(args.seed)
+    field = build_field(args.size, args.coverage, rng)
+    hero, goal, enemies = choose_positions(field, args.enemies, rng)
     costs = build_costmap(field, enemies)
 
     figure, axis = plt.subplots()
     extent = [ 
-        -MAP_SIZE * RESOLUTION / 2,
-        MAP_SIZE * RESOLUTION / 2,
-        -MAP_SIZE * RESOLUTION / 2,
-        MAP_SIZE * RESOLUTION / 2,
+        -args.size * RESOLUTION / 2,
+        args.size * RESOLUTION / 2,
+        -args.size * RESOLUTION / 2,
+        args.size * RESOLUTION / 2,
     ]
-
-    path = a_star(field, tuple(hero), tuple(goal))
+    if args.rust_backend:
+        path = a_star_rs(np.asarray(field, dtype=np.float64),
+                         (int(hero[0]), int(hero[1])),(int(goal[0]), int(goal[1])))
+    else:
+        path = a_star(field, tuple(hero), tuple(goal))
     path_plot, = axis.plot([], [], "y-", linewidth=2, label="A* Path")
 
     def render_path(path):
@@ -115,12 +126,14 @@ def main():
 
     axis.set_title("Flatland")
     axis.set_aspect("equal")
-    axis.legend()
+    axis.grid(False)
+    axis.set_xticks([])
+    axis.set_yticks([])
 
     animation = None
 
     def update(_frame):
-        '''field state update loop'''
+        '''game state update loop'''
         nonlocal enemies, hero, path, teleport_counter # want persistance between frames
 
         hero_costmap = build_costmap(field, enemies)
@@ -164,7 +177,7 @@ def main():
             axis.set_title("The Hero Wins!")
             print(Fore.GREEN + Style.BRIGHT + "You Won :)")
 
-        if result is not None:
+        if result is not None: # shut down sequence
             if animation is not None and animation.event_source is not None:
                 animation.event_source.stop()
             figure.canvas.draw()
@@ -177,7 +190,7 @@ def main():
     animation = FuncAnimation(
         figure,
         update,
-        interval=SPEED,
+        interval=args.speed,
         cache_frame_data=False
     )
     # animation.save("animation.gif", writer="pillow", fps=5)

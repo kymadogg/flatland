@@ -1,0 +1,15 @@
+[package]
+name = "flatland"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "flatland"
+path = "src/planner.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.29.0", features = ["extension-module"] }
+ordered-float = "4"
+numpy = "0.29.0"
+heapq = "0.2.0"
