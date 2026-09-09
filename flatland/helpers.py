@@ -1,8 +1,7 @@
 import numpy as np
-from matplotlib.colors import LinearSegmentedColormap
 
 
-def neighbors_8(cell) -> list[tuple[int, int]]:
+def neighbors_8(cell, limit) -> list[tuple[int, int]]:
     neighbors = []
 
     for row_change in (-1, 0, 1):
@@ -12,12 +11,12 @@ def neighbors_8(cell) -> list[tuple[int, int]]:
 
             new_cell = (cell[0] + row_change, cell[1] + column_change)
 
-            if 0 <= new_cell[0] < 64 and 0 <= new_cell[1] < 64:
+            if 0 <= new_cell[0] < limit and 0 <= new_cell[1] < limit:
                 neighbors.append(new_cell)
     return neighbors
 
 
-def neighbors_4(cell) -> list[tuple[int, int]]:
+def neighbors_4(cell, limit) -> list[tuple[int, int]]:
     neighbors = []
     row, column = cell
 
@@ -29,7 +28,7 @@ def neighbors_4(cell) -> list[tuple[int, int]]:
     ):
         new_cell = (row + row_change, column + column_change)
 
-        if 0 <= new_cell[0] < 64 and 0 <= new_cell[1] < 64:
+        if 0 <= new_cell[0] < limit and 0 <= new_cell[1] < limit:
             neighbors.append(new_cell)
     return neighbors
 

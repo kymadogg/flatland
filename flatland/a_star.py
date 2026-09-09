@@ -25,7 +25,7 @@ def a_star(field: npt.ArrayLike,start: Cell,goal: Cell) -> list[Cell]:
         if current == goal: # if you are at the goal
             break
 
-        for neighbor in neighbors_8(current):
+        for neighbor in neighbors_8(current, grid.shape[0]):
 
             if np.isinf(grid[neighbor[0], neighbor[1]]):
                 continue
