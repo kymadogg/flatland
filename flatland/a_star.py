@@ -3,11 +3,11 @@ from typing import TypeAlias
 import numpy as np
 from numpy import typing as npt
 
-from helpers import euclidean_distance, neighbors_8, neighbors_4
+from .helpers import euclidean_distance, neighbors_8
 
 Cell: TypeAlias = tuple[int, int]
 
-def a_star(field: npt.ArrayLike,start: Cell,goal: Cell,) -> list[Cell]:
+def a_star(field: npt.ArrayLike,start: Cell,goal: Cell) -> list[Cell]:
     grid = np.asarray(field)
 
     if np.isinf(grid[start]) or np.isinf(grid[goal]):
@@ -25,19 +25,18 @@ def a_star(field: npt.ArrayLike,start: Cell,goal: Cell,) -> list[Cell]:
         if current == goal: # if you are at the goal
             break
 
-        for neighbor in neighbors_8(current):
+        for neighbor in neighbors_8(current, grid.shape[0]):
 
             if np.isinf(grid[neighbor[0], neighbor[1]]):
                 continue
 
             row_change = neighbor[0] - current[0]
             column_change = neighbor[1] - current[1]
-
             is_diagonal = row_change != 0 and column_change != 0
 
-            if is_diagonal:
+            if is_diagonal: # don't go through diagonal gaps of both horizontal and vertical are blocked in that direction
                 vertical_blocked = np.isinf(grid[current[0] + row_change, current[1]])
-                horizontal_blocked = np.isinf( grid[current[0], current[1] + column_change])
+                horizontal_blocked = np.isinf(grid[current[0], current[1] + column_change])
 
                 if vertical_blocked or horizontal_blocked:
                     continue

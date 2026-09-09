@@ -1,5 +1,5 @@
 import numpy as np
-from colorama import Fore, Style, init
+from colorama import Fore, init
 
 init(autoreset=True)
 
@@ -19,7 +19,7 @@ def move_enemies(field, enemies, hero):
                 new_cell = [row + row_change, column + column_change]
 
                 # make sure new cell is in map bounds
-                if (0 <= new_cell[0] < 64 and 0 <= new_cell[1] < 64):
+                if (0 <= new_cell[0] < field.shape[0] and 0 <= new_cell[1] < field.shape[0]):
                     distance = np.linalg.norm(hero - new_cell) # calc euclidean distance 
                     candidates.append((distance, new_cell[0], new_cell[1]))
 

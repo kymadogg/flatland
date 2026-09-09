@@ -23,7 +23,6 @@ def build_costmap(field: np.ndarray, enemies: np.ndarray, inflation_radius: int 
     costs[field != 0] = np.inf
     return costs
 
-
 nav2_costmap_colors = [
     (0.00, "#cac4cd"),  # free space
     (0.05, "#4b145f"),  
