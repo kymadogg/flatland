@@ -20,7 +20,6 @@ from .flatland import a_star_rs # rust module import
 from .game_logging import log_config, log_state, log_result
 
 RESOLUTION = 0.1 # grid resolution
-DIFFICULTY = 0 # 0 = easy, 1 = medium, 2 = hard (maybe implement?)
 
 init(autoreset=True)
 
@@ -230,11 +229,11 @@ def main():
         result = game_over(field, enemies, hero, goal)
 
         if result == "win":
-            print(Fore.GREEN + Style.BRIGHT + "Won", teleport_counter)
+            print(Fore.GREEN + Style.BRIGHT + "Won", f"with {teleport_counter} teleports")
         elif result == "lose":
-            print(Fore.RED + Style.BRIGHT + "Lost", teleport_counter)
+            print(Fore.RED + Style.BRIGHT + "Lost", f"with {teleport_counter} teleports")
         elif result == "trapped":
-            print(Fore.MAGENTA + Style.BRIGHT + "Blocked Goal", teleport_counter)
+            print(Fore.MAGENTA + Style.BRIGHT + "Blocked Goal", f"with {teleport_counter} teleports")
 
         if result is not None:
             if args.data:

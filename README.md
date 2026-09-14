@@ -4,7 +4,7 @@ Flatland is a 2D grid world simulator where a hero point robot evades multiple e
 ## Requirements & Building
 This is a hybrid package that uses both Python and Rust, so both [uv](https://docs.astral.sh/uv/getting-started/installation/) and [cargo](https://rust-lang.org/tools/install/) will be needed to run the game.
 
-![Flatland being played](img/image.png)
+![Flatland being played](img/flatland.gif)
 
 ## Setting up the Environment
 Make sure both of these commands are run in the project root!
@@ -36,6 +36,13 @@ There are also many ways to run Flatland with different settings.
 | `--data` | | flag | `False` | Enable JSONL game-state logging |
 | `--frames` | | `int` | `1000` | Number of frames to run in headless mode |
 
+### Some cool examples to try out
+
+Results in a null game
+```bash
+uv run flatland --seed 350
+```
+
 ## File Directory 
 ```
 flatland/
@@ -61,10 +68,10 @@ flatland/
 ```
 
 ### Notable Files:
-- `planner.rs` contains A* written in Rust
+- `src/planner.rs` contains A* written in Rust
 - `main.py` contains the main update function
 - `a_star.py` contains A* written in Python
-- `game_logic.py`enemy
+- `game_logic.py`enemy behavior and some other game logic
 
 ## Libraries Used
 Here is a list of the libraries I used for this project.

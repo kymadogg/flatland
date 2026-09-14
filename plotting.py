@@ -276,7 +276,7 @@ def plot_dot_distribution(logs, value_name, title, y_label):
     for log in logs:
         version = get_config_value(log, "version")
 
-        if version is None:
+        if version is None or version == 1:
             continue
 
         label = VERSION_LABELS.get(version, f"Unknown ({version})")
@@ -335,7 +335,7 @@ def plot_astar_statistics(logs):
     for log in logs:
         version = get_config_value(log, "version")
 
-        if version is None:
+        if version is None or version == 1:
             continue
 
         label = VERSION_LABELS.get(version, f"Unknown ({version})")
@@ -404,7 +404,7 @@ def plot_execution_time_with_stats(logs):
     for log in logs:
         version = get_config_value(log, "version")
 
-        if version is None:
+        if version is None or version == 1:
             continue
 
         label = VERSION_LABELS.get(version, f"Unknown ({version})")
@@ -505,7 +505,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--data-dir",
         type=Path,
-        default=Path("data"),
+        default=Path("data/cov_5_30"),
     )
     args = parser.parse_args()
 
@@ -514,17 +514,17 @@ if __name__ == "__main__":
     if not logs:
         raise SystemExit(f"No JSONL logs found in {args.data_dir}")
 
-    # plot_average_teleports_vs_coverage(logs)
-    # plot_average_enemies_vs_timestep(logs)
+    plot_average_teleports_vs_coverage(logs)
+    plot_average_enemies_vs_timestep(logs)
     # plot_astar_performance(logs)
     # plot_time_per_path_step(logs)
-    plot_dot_distribution(
-        logs,
-        "planner_time_ms",
-        "A* execution time",
-        "Execution time (ms)",
-    )
-    # plot_dot_distribution(logs, "path_length", "A* path lengths", "Path length")
-    plot_astar_statistics(logs)
-    plot_execution_time_with_stats(logs)
+    # plot_dot_distribution(
+    #     logs,
+    #     "planner_time_ms",
+    #     "A* execution time",
+    #     "Execution time (ms)",
+    # )
+    # # plot_dot_distribution(logs, "path_length", "A* path lengths", "Path length")
+    # plot_astar_statistics(logs)
+    # plot_execution_time_with_stats(logs)
     plt.show()
