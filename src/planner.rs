@@ -1,12 +1,10 @@
 use pyo3::prelude::*;
 use ordered_float::OrderedFloat;
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap};
 use numpy::PyReadonlyArray2;
 use heapq::PriorityQueue;
 
 type Cell = (i32, i32);
-
 
 fn heuristic(a: Cell, b: Cell) -> f64 { //heuristic
     let row_difference = a.0 - b.0;
@@ -37,95 +35,6 @@ fn n8(cell:Cell, side_length:i32) -> PyResult<Vec<Cell>>{
 
 #[pyfunction]
 fn a_star_rs(field: PyReadonlyArray2<'_, f64>, start: Cell, goal: Cell,) -> PyResult<Vec<Cell>> {
-    let grid = field.as_array();
-    let rows = grid.shape()[0] as i32;
-    let columns = grid.shape()[1] as i32;
-
-    let in_bounds = |cell: Cell| {
-        cell.0 >= 0 && cell.0 < rows && cell.1 >= 0 && cell.1 < columns
-    };
-
-    if !in_bounds(start) || !in_bounds(goal) {
-        return Ok(Vec::new());
-    }
-
-    let value_at = |cell: Cell| {
-        grid[(cell.0 as usize, cell.1 as usize)]
-    };
-
-    if value_at(start).is_infinite() || value_at(goal).is_infinite() {
-        return Ok(Vec::new());
-    }
-
-    let mut frontier = BinaryHeap::new();
-    frontier.push(Reverse((OrderedFloat(0.0), start)));
-
-    let mut came_from: HashMap<Cell, Option<Cell>> = HashMap::new();
-    let mut cost_so_far: HashMap<Cell, f64> = HashMap::new();
-
-    came_from.insert(start, None);
-    cost_so_far.insert(start, 0.0);
-
-    while let Some(Reverse((_, current))) = frontier.pop() {
-        if current == goal {
-            break;
-        }
-
-        for neighbor in n8(current, rows)? {
-            let neighbor_cost = value_at(neighbor);
-
-            if neighbor_cost.is_infinite() {
-                continue;
-            }
-
-            let row_change = neighbor.0 - current.0;
-            let column_change = neighbor.1 - current.1;
-
-            if row_change != 0 && column_change != 0 {
-                let vertical = (current.0 + row_change, current.1);
-                let horizontal = (current.0, current.1 + column_change);
-
-                if value_at(vertical).is_infinite()
-                    || value_at(horizontal).is_infinite()
-                {
-                    continue;
-                }
-            }
-
-            let move_cost = heuristic((0, 0),(row_change, column_change),);
-            let new_cost = cost_so_far[&current]+ move_cost+ neighbor_cost;
-
-            if cost_so_far.get(&neighbor).is_none_or(|old_cost| new_cost < *old_cost){
-                cost_so_far.insert(neighbor, new_cost);
-
-                let priority = new_cost + heuristic(neighbor, goal);
-
-                frontier.push(Reverse((OrderedFloat(priority),neighbor)));
-                came_from.insert(neighbor, Some(current));
-            }
-        }
-    }
-
-    if !came_from.contains_key(&goal) {
-        return Ok(Vec::new());
-    }
-
-    let mut path = Vec::new();
-    let mut current = goal;
-
-    while let Some(previous) = came_from[&current] {
-        path.push(current);
-        current = previous;
-    }
-
-    path.push(start);
-    path.reverse();
-
-    Ok(path)
-}
-
-#[pyfunction]
-fn a_star_rs_v2(field: PyReadonlyArray2<'_, f64>, start: Cell, goal: Cell,) -> PyResult<Vec<Cell>> {
     // a star implementation using heapq instead of hashmaps
 
     let grid = field.as_array();
@@ -159,7 +68,6 @@ fn a_star_rs_v2(field: PyReadonlyArray2<'_, f64>, start: Cell, goal: Cell,) -> P
     let mut cost_so_far = vec![f64::INFINITY; total_cells];
     let mut came_from: Vec<Option<Cell>> = vec![None; total_cells];
     let mut closed_set = vec![false; total_cells];
-
 
     // holds queue payloads
     struct Node {
@@ -265,10 +173,11 @@ fn a_star_rs_v2(field: PyReadonlyArray2<'_, f64>, start: Cell, goal: Cell,) -> P
     Ok(path)
 }
 
+
+// python bindings!
 #[pymodule]
 fn flatland(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(n8, m)?)?;
     m.add_function(wrap_pyfunction!(a_star_rs, m)?)?;
-    m.add_function(wrap_pyfunction!(a_star_rs_v2, m)?)?;
     Ok(())
 }
