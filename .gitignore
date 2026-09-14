@@ -12,3 +12,4 @@ wheels/
 # rust + cargo stuff
 /target
 **.so
+/data
