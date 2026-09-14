@@ -6,6 +6,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 
+import matplotlib
+import sys
+
+if "--headless" in sys.argv:
+    matplotlib.use("Agg")
+
 '''
 Plot ideas:
 

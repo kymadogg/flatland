@@ -4,7 +4,7 @@ Flatland is a 2D grid world simulator where a hero point robot evades multiple e
 ## Requirements & Building
 This is a hybrid package that uses both Python and Rust, so both [uv](https://docs.astral.sh/uv/getting-started/installation/) and [cargo](https://rust-lang.org/tools/install/) will be needed to run the game.
 
-![Flatland being played](img/flatland.gif)
+![Flatland being played](./img/flatland.gif)
 
 ## Setting up the Environment
 Make sure both of these commands are run in the project root!

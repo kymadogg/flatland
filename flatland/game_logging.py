@@ -1,13 +1,22 @@
 import json
 from datetime import datetime
 from pathlib import Path
-
+import argparse
 import numpy as np
 
-TEST_NAME = 'py_rs_rsv2'
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--test",
+    type=str,
+    default="default",
+    help="Name of the test",
+)
+args = parser.parse_args()
+
+test_name = args.test
 
 timestamp = f"{datetime.now().strftime('%H:%M:%S')}_{datetime.now().strftime('%f')[:2]}"
-LOG_FILE = Path(f"data/{TEST_NAME}/trial_{timestamp}.jsonl")
+LOG_FILE = Path(f"data/{test_name}/trial_{timestamp}.jsonl")
 
 def _json_value(value):
     if isinstance(value, np.ndarray):
@@ -51,3 +60,4 @@ def log_result(result, step, teleport_count):
         "step": step,
         "teleports": teleport_count,
     })
+
