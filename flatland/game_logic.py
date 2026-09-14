@@ -1,7 +1,4 @@
 import numpy as np
-from colorama import Fore, init
-
-init(autoreset=True)
 
 def move_enemies(field, enemies, hero):
     '''update the position of each enemy'''
@@ -20,14 +17,14 @@ def move_enemies(field, enemies, hero):
 
                 # make sure new cell is in map bounds
                 if (0 <= new_cell[0] < field.shape[0] and 0 <= new_cell[1] < field.shape[0]):
-                    distance = np.linalg.norm(hero - new_cell) # calc euclidean distance 
+                    distance = np.linalg.norm(hero - new_cell) # calc euclidean distance to hero from new cell 
                     candidates.append((distance, new_cell[0], new_cell[1]))
 
         if not candidates:
             updated.append([row, column])
             continue
 
-        _, new_cell[0], new_cell[1] = min(candidates)
+        _, new_cell[0], new_cell[1] = min(candidates) # return the shortest distance
 
         if field[new_cell[0], new_cell[1]] != 0: # hitting an obstacle logic
             field[row, column] = 100
@@ -37,29 +34,24 @@ def move_enemies(field, enemies, hero):
 
     return np.asarray(updated, dtype=int).reshape(-1, 2)
 
-def game_over(enemies, hero, goal):
-    """return 'win', 'lose', or None while the game continues."""
-    if np.array_equal(goal, hero):
+def game_over(field, enemies, hero, goal):
+    """Return 'win', 'lose', 'trapped', or None."""
+    if np.array_equal(hero, goal):
         return "win"
 
-    if np.any(np.all(enemies == hero, axis=1)): # hit obstacle or encounter enemy
+    if np.any(np.all(enemies == hero, axis=1)):
         return "lose"
+
+    if field[tuple(goal)] != 0:
+        return "trapped"
 
     return None
 
 def move_hero(path, hero):
+    '''move the hero along the path'''
     if len(path) > 1:
         return np.asarray(path[1], dtype=int)
 
     return hero
-
-def teleport(costmap, field, rng):
-    """move the hero to a randomly selected safe free cell."""
-    
-    free_cells = np.argwhere((costmap == 0) & (field == 0))
-    selected = rng.integers(len(free_cells))
-    print(Fore.BLUE + "Teleport Used!")
-    return free_cells[selected].astype(int)
-
 
 
